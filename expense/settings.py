@@ -24,7 +24,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # OpenAI API key
 OPENAI_API_KEY = config('OPENAI_API_KEY')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['expense-tracker-xjqd.onrender.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -45,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware"
 ]
 
 ROOT_URLCONF = 'expense.urls'
@@ -89,7 +90,12 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # your existing static folder
+]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
