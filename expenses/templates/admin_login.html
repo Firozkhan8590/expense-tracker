@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .floating-label input:focus ~ label,
+        .floating-label input:not(:placeholder-shown) ~ label {
+            @apply -top-3 left-2 text-xs text-blue-600 bg-white px-1;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-200 via-white to-blue-300 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white/80 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-sm mx-auto">
+        <div class="flex flex-col items-center mb-6">
+            <span class="bg-blue-600 p-3 rounded-full shadow-lg mb-2">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                </svg>
+            </span>
+            <h1 class="text-2xl font-extrabold text-blue-700 tracking-tight">Admin Login</h1>
+        </div>
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div class="floating-label relative">
+                <input type="text" name="username" id="username" placeholder=" " required
+                    class="peer w-full border border-blue-200 rounded-lg px-3 py-3 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition placeholder-transparent"/>
+                <label for="username" class="absolute left-3 top-3 text-gray-500 pointer-events-none transition-all duration-200 bg-transparent peer-focus:-top-3 peer-focus:left-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:bg-white peer-placeholder-shown:top-3 peer-placeholder-shown:left-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500">
+                    Username
+                </label>
+            </div>
+            <div class="floating-label relative">
+                <input type="password" name="password" id="password" placeholder=" " required
+                    class="peer w-full border border-blue-200 rounded-lg px-3 py-3 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition placeholder-transparent"/>
+                <label for="password" class="absolute left-3 top-3 text-gray-500 pointer-events-none transition-all duration-200 bg-transparent peer-focus:-top-3 peer-focus:left-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:bg-white peer-placeholder-shown:top-3 peer-placeholder-shown:left-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500">
+                    Password
+                </label>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold shadow transition">
+                Login
+            </button>
+        </form>
+        {% if messages %}
+            <div class="mt-4 text-red-500 text-center animate-pulse">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

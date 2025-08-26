@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 via-white to-blue-200 font-sans min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white/70 backdrop-blur-lg shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center gap-2 text-2xl font-extrabold text-blue-700 tracking-tight">
+                <span class="bg-blue-600 p-2 rounded-lg shadow">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                </span>
+                Expense Tracker
+            </a>
+            <div class="space-x-4 text-blue-700 font-semibold">
+            <a href="#" class="hover:underline">Home</a>
+            <a href="#" class="hover:underline">Expenses</a>
+            <a href="#" class="hover:underline">Reports</a>
+            <a href="{% url 'login' %}" class="hover:underline">User Login</a>
+            <a href="{% url 'admin_login' %}" class="bg-red-500 px-3 py-1 rounded-lg text-white hover:bg-red-600 transition shadow">
+                Admin Login
+            </a>
+</div>
+
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-tr from-blue-200 via-white to-blue-100 py-20 overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center px-4 relative z-10">
+            <h1 class="text-5xl font-extrabold mb-4 text-blue-700 drop-shadow">Track Your Expenses Effortlessly</h1>
+            <p class="text-gray-700 mb-8 text-lg">Keep a record of your personal and team expenses and get AI-based budget suggestions.</p>
+            <a href="{% url 'register' %}" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-lg shadow-lg hover:bg-blue-700 transition">Get Started</a>
+        </div>
+        <!-- Decorative SVG Illustration -->
+        <div class="absolute right-0 bottom-0 w-1/2 max-w-lg opacity-30 pointer-events-none z-0 hidden md:block">
+            <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="200" cy="150" rx="200" ry="150" fill="#3B82F6" fill-opacity="0.2"/>
+                <ellipse cx="300" cy="100" rx="100" ry="80" fill="#2563EB" fill-opacity="0.15"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="max-w-6xl mx-auto py-16 px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 hover:scale-105 hover:shadow-2xl transition-all duration-200">
+            <div class="flex justify-center mb-4">
+                <span class="bg-blue-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+                        <path d="M12 2v2m0 16v2m10-10h-2M4 12H2"/>
+                    </svg>
+                </span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2 text-blue-700">Easy Expense Logging</h3>
+            <p class="text-gray-600">Add, edit, and manage your expenses in a few clicks.</p>
+        </div>
+        <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 hover:scale-105 hover:shadow-2xl transition-all duration-200">
+            <div class="flex justify-center mb-4">
+                <span class="bg-green-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/>
+                        <path d="M16 11V7a4 4 0 00-8 0v4"/>
+                    </svg>
+                </span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2 text-green-700">Reports & Analytics</h3>
+            <p class="text-gray-600">View monthly summaries and category-wise breakdowns.</p>
+        </div>
+        <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 hover:scale-105 hover:shadow-2xl transition-all duration-200">
+            <div class="flex justify-center mb-4">
+                <span class="bg-yellow-100 p-3 rounded-full">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 8v4l3 3"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2 text-yellow-700">AI Budget Suggestions</h3>
+            <p class="text-gray-600">Get smart budget recommendations based on your spending patterns.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-blue-700 text-white text-center py-6 mt-12 shadow-inner">
+        &copy; 2025 Expense Tracker. All Rights Reserved.
+    </footer>
+
+</body>
+</html>

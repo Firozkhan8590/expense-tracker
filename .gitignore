@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Django
+*.sqlite3
+*.log
+db.sqlite3
+media/
+staticfiles/
+*.pot
+
+# Environment variables
+.env
+
+# OpenAI keys / secrets
+*.key
+*.secret
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup / temp files
+*.bak
+*.swp
+*.tmp
+
+# Coverage / testing
+htmlcov/
+.coverage
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
