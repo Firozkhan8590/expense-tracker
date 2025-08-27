@@ -5,9 +5,10 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECRET_KEY and sensitive info
-SECRET_KEY = config('SECRET_KEY', default='unsafe-secret-key-for-dev')
-DEBUG = config('DEBUG', default=False, cast=bool)
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', cast=bool)
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+
 
 ALLOWED_HOSTS = ['expense-tracker-3-i6vq.onrender.com', 'localhost', '127.0.0.1']
 
