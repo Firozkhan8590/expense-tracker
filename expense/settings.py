@@ -9,7 +9,7 @@ SECRET_KEY = config('SECRET_KEY', default='unsafe-secret-key-for-dev')
 DEBUG = config('DEBUG', default=False, cast=bool)
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 
-ALLOWED_HOSTS = ['expense-tracker-xjqd.onrender.com']
+ALLOWED_HOSTS = ['expense-tracker-xjqd.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
