@@ -10,7 +10,7 @@ DEBUG = config('DEBUG', cast=bool)
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 
 
-ALLOWED_HOSTS = ['expense-tracker-3-i6vq.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
