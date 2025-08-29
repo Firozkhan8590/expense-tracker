@@ -77,7 +77,7 @@ def dashboard(request):
     today = date.today()
     
     # Fetch all expenses (user + shared)
-    expenses = Expense.objects.filter(Q(user=user) | Q(visibility='Shared')).order_by('-date')
+    expenses = Expense.objects.filter(Q(user=user)).order_by('-date')
 
     # Totals
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -101,7 +101,6 @@ def dashboard(request):
 
 
 @login_required(login_url='login')
-@login_required(login_url='login')
 def add_expense(request):
     if request.method == "POST":
         title = request.POST['title']
@@ -118,19 +117,10 @@ def add_expense(request):
             description=description,
             visibility=visibility
         )
-
-        # 🔥 Re-generate AI suggestion after new expense
-        today = date.today()
-        ai_suggestion = get_ai_budget_suggestion(request.user)
-        AiSuggestion.objects.update_or_create(
-            user=request.user,
-            month=today.month,
-            year=today.year,
-            defaults={"suggestion": ai_suggestion}
-        )
-
         return redirect('user_dashboard')
+    ai_suggestion = get_ai_budget_suggestion(request.user)
 
+    return render(request, 'add_expense.html',{'ai_suggestion': ai_suggestion})
 def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
 
