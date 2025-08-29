@@ -1,29 +1,38 @@
-# utils.py
-from openai import OpenAI
+import google.generativeai as genai
 from django.conf import settings
-from typing import List, Dict
+from .models import Expense
 
-# Initialize client with API key from settings
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+# Configure Gemini
+genai.configure(api_key=settings.GEMINI_API_KEY)
 
-def get_ai_budget_suggestion(user_expenses):
+def get_ai_budget_suggestion(user):
+    # Fetch user expenses
+    expenses = Expense.objects.filter(user=user).order_by('-date')[:50]  # last 50 expenses
+    if not expenses.exists():
+        return "Start tracking your expenses to get smart suggestions."
+
+    # Summarize spending pattern
+    category_summary = {}
+    for exp in expenses:
+        category_summary[exp.category] = category_summary.get(exp.category, 0) + exp.amount
+
+    summary_text = "\n".join(
+        [f"{cat}: ₹{amt}" for cat, amt in category_summary.items()]
+    )
+
+    # Prompt for Gemini
+    prompt = f"""
+    You are a financial assistant. Analyze this user’s spending pattern and give a  clear paragraph, personalized suggestions
+    to help them save money or manage better.
+
+    User’s spending summary:
+    {summary_text}
+
+    Provide short, useful tips in plain English.
+    """
+
     try:
-        prompt = f"""
-        I have the following monthly expenses:
-        {user_expenses}
-
-        Suggest a reasonable budget limit for next month.
-        Also provide 2-3 tips to save money or highlight unusual spending patterns.
-        """
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=150
-        )
-        suggestion = response.choices[0].message.content
-        return suggestion
-    
+        response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
+        return response.text.strip()
     except Exception as e:
-        return f"Error fetching AI suggestion: {str(e)}"
-    
-
+        return f"AI Suggestion error: {str(e)}"

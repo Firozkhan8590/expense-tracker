@@ -53,14 +53,22 @@ def login_view(request):
     return render(request, 'login.html')
 
 
-from django.db.models import Q
+
 import json
 
 
-from .utils import get_ai_budget_suggestion
 
-from .models import AiSuggestion
-from django.db.models import Sum
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Q
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta   
+
+from .models import Expense, AiSuggestion
+from .utils import get_ai_budget_suggestion
 
 
 @login_required(login_url='login')
@@ -68,34 +76,17 @@ def dashboard(request):
     user = request.user
     today = date.today()
     
+    # Fetch all expenses (user + shared)
     expenses = Expense.objects.filter(Q(user=user) | Q(visibility='Shared')).order_by('-date')
+
+    # Totals
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
     monthly_expenses = expenses.filter(date__month=today.month, date__year=today.year)\
                                .aggregate(Sum('amount'))['amount__sum'] or 0
     suggested_budget = float(monthly_expenses) * 1.2
 
-    # Prepare AI data
-    expense_list = [
-        {'category': exp.category, 'amount': float(exp.amount)}
-        for exp in expenses.filter(date__month=today.month, date__year=today.year)
-    ]
-
-    # Check if AI suggestion exists for this user & month
-    ai_record = AiSuggestion.objects.filter(user=user, month=today.month, year=today.year).first()
-    if ai_record:
-        ai_suggestion = ai_record.suggestion
-    else:
-        if expense_list:
-            ai_suggestion = get_ai_budget_suggestion(expense_list)
-            # Save AI suggestion to DB
-            AiSuggestion.objects.create(
-                user=user,
-                month=today.month,
-                year=today.year,
-                suggestion=ai_suggestion
-            )
-        else:
-            ai_suggestion = "No expenses recorded yet. Add some to get AI suggestions."
+    # 🔥 Always recalculate AI suggestion dynamically
+    ai_suggestion = get_ai_budget_suggestion(user)
 
     context = {
         'expenses': expenses,
@@ -109,8 +100,7 @@ def dashboard(request):
 
 
 
-
-
+@login_required(login_url='login')
 @login_required(login_url='login')
 def add_expense(request):
     if request.method == "POST":
@@ -128,9 +118,19 @@ def add_expense(request):
             description=description,
             visibility=visibility
         )
+
+        # 🔥 Re-generate AI suggestion after new expense
+        today = date.today()
+        ai_suggestion = get_ai_budget_suggestion(request.user)
+        AiSuggestion.objects.update_or_create(
+            user=request.user,
+            month=today.month,
+            year=today.year,
+            defaults={"suggestion": ai_suggestion}
+        )
+
         return redirect('user_dashboard')
 
-    return render(request, 'add_expense.html')
 def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
 
