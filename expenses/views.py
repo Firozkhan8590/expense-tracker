@@ -118,9 +118,11 @@ def add_expense(request):
             visibility=visibility
         )
         return redirect('user_dashboard')
+    
     ai_suggestion = get_ai_budget_suggestion(request.user)
 
-    return render(request, 'add_expense.html',{'ai_suggestion': ai_suggestion})
+    return render(request, 'add_expense.html', {'ai_suggestion': ai_suggestion})
+
 def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
 
@@ -159,8 +161,7 @@ def admin_login(request):
             messages.error(request, "Invalid credentials or not an admin.")
     
     return render(request, 'admin_login.html')
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+
 from django.contrib.auth.models import User
 from expenses.models import Expense
 from django.db.models import Sum
