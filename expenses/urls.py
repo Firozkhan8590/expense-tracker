@@ -8,8 +8,8 @@ urlpatterns = [
    path('login/',views.login_view, name='login'),
    path('dashboard/',views.dashboard, name='user_dashboard'),
    path('add-expense/',views.add_expense, name='add_expense'),
-   path('edit-expense/<int:expense_id>/', views.edit_expense, name='edit_expense'),
-   path('delete-expense/<int:expense_id>/', views.delete_expense, name='delete_expense'),
+   path('edit-expense/<int:expense_id>/', views.edit_expense_user, name='edit_expense_user'),
+   path('delete-expense/<int:expense_id>/', views.delete_expense_user, name='delete_expense_user'),
    path('logout/', views.logout_view, name='logout'),
 
    #admin

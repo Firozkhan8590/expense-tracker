@@ -70,19 +70,31 @@ from dateutil.relativedelta import relativedelta
 from .models import Expense, AiSuggestion
 from .utils import get_ai_budget_suggestion
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Q
+from datetime import date
+from .models import Expense, AiSuggestion
+from .utils import get_ai_budget_suggestion
+
 
 @login_required(login_url='login')
 def dashboard(request):
     user = request.user
     today = date.today()
-    
-    # Fetch all expenses (user + shared)
-    expenses = Expense.objects.filter(Q(user=user)).order_by('-date')
+
+    # ✅ Include both user’s private expenses and shared ones
+    expenses = Expense.objects.filter(
+        Q(user=user) | Q(visibility='shared')
+    ).order_by('-date')
 
     # Totals
-    total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
-    monthly_expenses = expenses.filter(date__month=today.month, date__year=today.year)\
-                               .aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expenses = expenses.aggregate(total=Sum('amount'))['total'] or 0
+
+    monthly_expenses = expenses.filter(
+        date__year=today.year,
+        date__month=today.month
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
     suggested_budget = float(monthly_expenses) * 1.2
 
     # 🔥 Always recalculate AI suggestion dynamically
@@ -90,14 +102,13 @@ def dashboard(request):
 
     context = {
         'expenses': expenses,
-        'total_expenses': total_expenses,
-        'monthly_expenses': monthly_expenses,
+        'total_expenses': float(total_expenses),
+        'monthly_expenses': float(monthly_expenses),
         'suggested_budget': suggested_budget,
         'ai_suggestion': ai_suggestion,
     }
 
     return render(request, 'user_dashboard.html', context)
-
 
 
 @login_required(login_url='login')
@@ -123,7 +134,7 @@ def add_expense(request):
 
     return render(request, 'add_expense.html', {'ai_suggestion': ai_suggestion})
 
-def edit_expense(request, expense_id):
+def edit_expense_user(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
 
     if request.method == "POST":
@@ -135,7 +146,7 @@ def edit_expense(request, expense_id):
         return redirect("user_dashboard")  # redirect to dashboard after saving
 
     return render(request, "edit_expense.html", {"expense": expense})
-def delete_expense(request, expense_id):
+def delete_expense_user(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
 
     if request.method == "POST":
@@ -143,7 +154,7 @@ def delete_expense(request, expense_id):
         return redirect("user_dashboard") 
 
     
-    return render(request, "delete_expense.html", {"expense": expense})
+    return render(request, "user_dashboard.html", {"expense": expense})
 def logout_view(request):
     logout(request)  # Logs out the user
     return render(request, "home.html")
@@ -175,9 +186,16 @@ def admin_required(view_func):
     return user_passes_test(lambda u: u.is_staff, login_url='admin_login')(view_func)
 
 
-import json
+
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+from django.utils.timezone import now
+from django.shortcuts import render
+import json
+import calendar
 
 @login_required(login_url='login')
 @admin_required
@@ -185,34 +203,57 @@ def admin_dashboard(request):
     # Admin sees ALL expenses
     expenses = Expense.objects.all().order_by('-date')
 
+    # Total expenses
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Monthly expenses
-    today = date.today()
-    monthly_expenses = expenses.filter(date__month=today.month, date__year=today.year)\
-                               .aggregate(Sum('amount'))['amount__sum'] or 0
+    today = now().date()
+    
+    monthly_expenses = expenses.filter(
+        date__year=today.year,
+        date__month=today.month
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    print(monthly_expenses)
 
+
+    # Suggested budget = 120% of this month's spend
     suggested_budget = float(monthly_expenses) * 1.2
 
-    # Category-wise for chart
+    # Category-wise totals for chart
     category_labels = ['Food', 'Travel', 'Shopping', 'Bills', 'Other']
     category_values = [
         float(expenses.filter(category=cat).aggregate(Sum('amount'))['amount__sum'] or 0)
         for cat in category_labels
     ]
 
-    # Monthly totals for chart
+    # Monthly totals for chart (all 12 months, single query)
+    monthly_data = (
+        expenses.filter(date__year=today.year)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    # Start with all months = 0
+    monthly_totals = {i: 0 for i in range(1, 13)}
+
+    # Fill data from query
+    for item in monthly_data:
+        monthly_totals[item['month'].month] = float(item['total'])
+
+    # Labels & values for chart.js
     monthly_labels = [calendar.month_abbr[i] for i in range(1, 13)]
-    monthly_values = [
-        float(expenses.filter(date__month=i, date__year=today.year).aggregate(Sum('amount'))['amount__sum'] or 0)
-        for i in range(1, 13)
-    ]
-    total_users = User.objects.count() 
+    monthly_values = [monthly_totals[i] for i in range(1, 13)]
+    
+
+    # Total users
+    total_users = User.objects.filter(is_staff=False ).count()
 
     context = {
         'expenses': expenses,
-        'total_expenses': total_expenses,
-        'monthly_expenses': monthly_expenses,
+        'total_expenses': float(total_expenses),
+        'monthly_expenses': float(monthly_expenses),
         'suggested_budget': suggested_budget,
         'category_labels': json.dumps(category_labels),
         'category_values': json.dumps(category_values),
@@ -223,13 +264,10 @@ def admin_dashboard(request):
     return render(request, 'admin_dashboard.html', context)
 
 
-
-
-
 @login_required(login_url='admin_login')
 def manage_users(request):
     # Get all users ordered by username
-    users = User.objects.all().order_by('username')
+    users = User.objects.filter(is_staff=False).order_by('username')
     return render(request, 'manage_users.html', {'users': users})
 
 
@@ -263,7 +301,7 @@ def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
 
     if request.method == 'POST':
-        expense.name = request.POST.get('name')
+        expense.title = request.POST.get('title')
         expense.amount = request.POST.get('amount')
         expense.category = request.POST.get('category')
         expense.date = request.POST.get('date')
@@ -271,7 +309,7 @@ def edit_expense(request, expense_id):
         messages.success(request, 'Expense updated successfully!')
         return redirect('manage_expenses')
 
-    return render(request, 'edit_expense.html', {'expense': expense})
+    return render(request, 'edit_expense_admin.html', {'expense': expense})
 @login_required(login_url='admin_login')
 def delete_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
